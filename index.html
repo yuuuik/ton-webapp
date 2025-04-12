@@ -6,50 +6,59 @@
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 40px; background: #f9f9f9; }
-    h1 { color: #007aff; }
+    body { font-family: sans-serif; background: #f0f0f0; text-align: center; padding: 40px; }
     .btn {
-      background: #007aff;
+      background-color: #007aff;
       color: white;
       padding: 12px 24px;
       font-size: 16px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       margin-top: 20px;
     }
+    #status { margin-top: 20px; font-size: 14px; }
   </style>
 </head>
 <body>
-  <h1>Подключи TON-кошелёк</h1>
-  <button class="btn" id="connect">🔗 Подключиться</button>
-  <p id="status"></p>
+  <h1>TON Connect</h1>
+  <button class="btn" id="connect">🔗 Подключить</button>
+  <div id="status"></div>
 
- <script>
-  const tg = window.Telegram.WebApp;
-  tg.expand();
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: "https://yuuuik.github.io/tonmanifest/tonconnect-manifest.json"
-  });
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: "https://yuuuik.github.io/tonmanifest/tonconnect-manifest.json"
+    });
 
-  document.getElementById("connect").addEventListener("click", async () => {
-    try {
-      const wallet = await tonConnectUI.connectWallet();
-      const address = wallet?.account?.address;
-
-      if (address) {
-        document.getElementById("status").innerText = "✅ Подключено: " + address;
-        tg.sendData(JSON.stringify({ address }));
-      } else {
-        document.getElementById("status").innerText = "❌ Адрес не получен. Попробуйте снова.";
+    async function restore() {
+      const connected = await tonConnectUI.restoreConnection();
+      if (connected && tonConnectUI.connected) {
+        const addr = tonConnectUI.wallet.account.address;
+        document.getElementById("status").innerText = "✅ Уже подключено: " + addr;
+        tg.sendData(JSON.stringify({ address: addr }));
       }
-    } catch (err) {
-      document.getElementById("status").innerText = "❌ Подключение отменено или отклонено.";
-      console.error("[TON CONNECT ERROR]", err);
     }
-  });
-</script>
 
+    document.getElementById("connect").addEventListener("click", async () => {
+      try {
+        const wallet = await tonConnectUI.connectWallet();
+        const address = wallet?.account?.address;
+        if (address) {
+          document.getElementById("status").innerText = "✅ Подключено: " + address;
+          tg.sendData(JSON.stringify({ address }));
+        } else {
+          document.getElementById("status").innerText = "❌ Адрес не получен.";
+        }
+      } catch (err) {
+        document.getElementById("status").innerText = "❌ Отклонено.";
+        console.error(err);
+      }
+    });
+
+    restore();
+  </script>
 </body>
 </html>
