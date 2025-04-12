@@ -44,23 +44,16 @@
       manifestUrl: "https://yuuuik.github.io/tonmanifest/tonconnect-manifest.json"
     });
 
-    async function connectOrRestore() {
+    async function connectWallet() {
       try {
-        const restored = await tonConnectUI.restoreConnection();
+        const wallet = await tonConnectUI.connectWallet();
+        const address = wallet?.account?.address;
 
-        if (restored && tonConnectUI.wallet) {
-          const address = tonConnectUI.wallet.account.address;
-          document.getElementById("status").innerText = "✅ Уже подключено: " + address;
+        if (address) {
+          document.getElementById("status").innerText = "✅ Подключено: " + address;
           tg.sendData(JSON.stringify({ address }));
         } else {
-          const wallet = await tonConnectUI.connectWallet();
-          const address = wallet?.account?.address;
-          if (address) {
-            document.getElementById("status").innerText = "✅ Подключено: " + address;
-            tg.sendData(JSON.stringify({ address }));
-          } else {
-            document.getElementById("status").innerText = "❌ Адрес не получен.";
-          }
+          document.getElementById("status").innerText = "❌ Адрес не получен.";
         }
       } catch (e) {
         document.getElementById("status").innerText = "❌ Ошибка подключения: " + e.message;
@@ -68,7 +61,14 @@
       }
     }
 
-    connectOrRestore();
+    // Проверим если кошелек уже подключен, если нет — открываем окно подключения
+    if (tonConnectUI.wallet) {
+      const address = tonConnectUI.wallet.account.address;
+      document.getElementById("status").innerText = "✅ Уже подключено: " + address;
+      tg.sendData(JSON.stringify({ address }));
+    } else {
+      connectWallet();  // если кошелек не подключен, открываем окно
+    }
   </script>
 </body>
 </html>
