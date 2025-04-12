@@ -6,15 +6,8 @@
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f9f9f9;
-      padding: 40px;
-      text-align: center;
-    }
-    h1 {
-      color: #007aff;
-    }
+    body { font-family: sans-serif; background: #f9f9f9; padding: 40px; text-align: center; }
+    h1 { color: #007aff; }
     .btn {
       background-color: #007aff;
       color: white;
@@ -25,10 +18,7 @@
       cursor: pointer;
       margin-top: 20px;
     }
-    #status {
-      margin-top: 20px;
-      font-size: 14px;
-    }
+    #status { margin-top: 20px; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -44,7 +34,6 @@
       manifestUrl: "https://yuuuik.github.io/tonmanifest/tonconnect-manifest.json"
     });
 
-    // При восстановлении сессии
     async function restore() {
       const connected = await tonConnectUI.restoreConnection();
       if (connected && tonConnectUI.connected) {
@@ -66,7 +55,6 @@
           console.log("✅ Address sent to bot:", address);
         } else {
           document.getElementById("status").innerText = "❌ Адрес не получен.";
-          console.log("⚠️ Address is empty");
         }
       } catch (err) {
         document.getElementById("status").innerText = "❌ Подключение отклонено.";
