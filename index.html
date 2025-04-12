@@ -37,14 +37,15 @@
       try {
         const wallet = await tonConnectUI.connectWallet();
         const address = wallet?.account?.address;
+
         if (address) {
-          tg.sendData(JSON.stringify({ address }));
           document.getElementById("status").innerText = "✅ Кошелёк подключён: " + address;
+          tg.sendData(JSON.stringify({ address }));
         } else {
-          document.getElementById("status").innerText = "❌ Ошибка подключения.";
+          document.getElementById("status").innerText = "❌ Кошелёк не дал адрес.";
         }
       } catch (err) {
-        document.getElementById("status").innerText = "❌ Ошибка: " + err;
+        document.getElementById("status").innerText = "❌ Ошибка: " + (err?.message || err);
       }
     });
   </script>
