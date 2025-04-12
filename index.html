@@ -25,29 +25,31 @@
   <button class="btn" id="connect">🔗 Подключиться</button>
   <p id="status"></p>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+ <script>
+  const tg = window.Telegram.WebApp;
+  tg.expand();
 
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: "https://yuuuik.github.io/tonmanifest/tonconnect-manifest.json"
-    });
+  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: "https://yuuuik.github.io/tonmanifest/tonconnect-manifest.json"
+  });
 
-    document.getElementById("connect").addEventListener("click", async () => {
-      try {
-        const wallet = await tonConnectUI.connectWallet();
-        const address = wallet?.account?.address;
+  document.getElementById("connect").addEventListener("click", async () => {
+    try {
+      const wallet = await tonConnectUI.connectWallet();
+      const address = wallet?.account?.address;
 
-        if (address) {
-          document.getElementById("status").innerText = "✅ Кошелёк подключён: " + address;
-          tg.sendData(JSON.stringify({ address }));
-        } else {
-          document.getElementById("status").innerText = "❌ Кошелёк не дал адрес.";
-        }
-      } catch (err) {
-        document.getElementById("status").innerText = "❌ Ошибка: " + (err?.message || err);
+      if (address) {
+        document.getElementById("status").innerText = "✅ Подключено: " + address;
+        tg.sendData(JSON.stringify({ address }));
+      } else {
+        document.getElementById("status").innerText = "❌ Адрес не получен. Попробуйте снова.";
       }
-    });
-  </script>
+    } catch (err) {
+      document.getElementById("status").innerText = "❌ Подключение отменено или отклонено.";
+      console.error("[TON CONNECT ERROR]", err);
+    }
+  });
+</script>
+
 </body>
 </html>
