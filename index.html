@@ -1,40 +1,59 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>TON Connect WebApp</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/sdk@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #fff; margin: 0; padding: 40px; text-align: center; }
-        h1 { color: #0088cc; }
-        .btn { background-color: #0088cc; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 18px; cursor: pointer; }
+        body { font-family: sans-serif; background: #f4f4f4; text-align: center; padding: 40px; }
+        h1 { color: #007aff; }
+        #qr { margin: 20px auto; }
+        .btn {
+            background: #007aff;
+            color: #fff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #link { display: block; margin-top: 10px; font-size: 14px; word-break: break-all; }
     </style>
 </head>
 <body>
-    <h1>Подключи TON кошелёк</h1>
-    <button class="btn" id="connectBtn">🔗 Подключиться</button>
-    <div id="status" style="margin-top: 20px;"></div>
+    <h1>Подключение TON кошелька</h1>
+    <button class="btn" onclick="connectWallet()">🔗 Подключиться</button>
+    <canvas id="qr"></canvas>
+    <a id="link" href="#" target="_blank"></a>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const tonConnect = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://yuuuik.github.io/tonmanifest/tonconnect-manifest.json'
-        });
+        async function connectWallet() {
+            try {
+                const res = await fetch('http://localhost:3000/connect');
+                const data = await res.json();
 
-        document.getElementById("connectBtn").onclick = async () => {
-            const connectedWallet = await tonConnect.connectWallet();
-            if (connectedWallet?.account?.address) {
-                tg.sendData(JSON.stringify({ address: connectedWallet.account.address }));
-                document.getElementById("status").innerText = "✅ Кошелёк подключён: " + connectedWallet.account.address;
-                setTimeout(() => tg.close(), 1500);
-            } else {
-                document.getElementById("status").innerText = "❌ Ошибка подключения";
+                const link = data.link;
+                const sessionId = data.sessionId;
+
+                document.getElementById("link").href = link;
+                document.getElementById("link").textContent = link;
+
+                QRCode.toCanvas(document.getElementById("qr"), link, { width: 256 }, function (error) {
+                    if (error) console.error(error);
+                });
+
+                if (sessionId) {
+                    tg.sendData(JSON.stringify({ sessionId: sessionId }));
+                }
+            } catch (err) {
+                alert("Ошибка подключения к backend: " + err);
             }
-        };
+        }
     </script>
 </body>
 </html>
