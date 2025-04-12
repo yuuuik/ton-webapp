@@ -1,35 +1,74 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>TON Connect WebApp</title>
+  <meta charset="UTF-8" />
+  <title>TON Connect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #007aff;
+    }
+    .btn {
+      background-color: #007aff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <button id="connect">🔗 Подключить кошелек</button>
-  <div id="status"></div>
+  <h1>TON Connect</h1>
+  <div id="status">Ожидание подключения...</div>
+
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
+
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: "https://yuuuik.github.io/tonmanifest/tonconnect-manifest.json"
     });
 
-    document.getElementById("connect").onclick = async () => {
+    async function connectOrRestore() {
       try {
-        const wallet = await tonConnectUI.connectWallet();
-        const address = wallet?.account?.address;
-        if (address) {
+        const restored = await tonConnectUI.restoreConnection();
+
+        if (restored && tonConnectUI.wallet) {
+          const address = tonConnectUI.wallet.account.address;
+          document.getElementById("status").innerText = "✅ Уже подключено: " + address;
           tg.sendData(JSON.stringify({ address }));
-          document.getElementById("status").innerText = "✅ Адрес отправлен: " + address;
         } else {
-          document.getElementById("status").innerText = "❌ Адрес не получен.";
+          const wallet = await tonConnectUI.connectWallet();
+          const address = wallet?.account?.address;
+          if (address) {
+            document.getElementById("status").innerText = "✅ Подключено: " + address;
+            tg.sendData(JSON.stringify({ address }));
+          } else {
+            document.getElementById("status").innerText = "❌ Адрес не получен.";
+          }
         }
       } catch (e) {
-        document.getElementById("status").innerText = "❌ Ошибка: " + e;
+        document.getElementById("status").innerText = "❌ Ошибка подключения: " + e.message;
+        console.error("Ошибка:", e);
       }
-    };
+    }
+
+    connectOrRestore();
   </script>
 </body>
 </html>
