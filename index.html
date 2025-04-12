@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>TON Connect WebApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 20px; text-align: center; }
+        h1 { color: #0088cc; }
+        #qr { margin: 20px auto; }
+        #status { margin-top: 20px; font-size: 16px; color: #333; }
+        .btn { background-color: #0088cc; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Подключи TON кошелёк</h1>
+    <canvas id="qr"></canvas>
+    <div>
+        <a id="link" href="#" class="btn" target="_blank">Открыть в Tonkeeper</a>
+    </div>
+    <div id="status">Ожидание подключения...</div>
+
+    <script>
+        const sessionId = "579380b9-50e7-4c51-a068-91735217f4e7";
+        const connectLink = "tonconnect://tonkeeper.app?manifestUrl=https://yuuuik.github.io/tonmanifest/tonconnect-manifest.json&session=" + sessionId;
+
+        QRCode.toCanvas(document.getElementById('qr'), connectLink, { width: 220 }, function (error) {
+            if (error) console.error(error);
+        });
+
+        document.getElementById("link").href = connectLink;
+
+        // Telegram WebApp init
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Подключение кошелька и авто-обновление
+        setInterval(() => {
+            fetch(`http://localhost:3000/status/${sessionId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.connected) {
+                        document.getElementById("status").innerText = "✅ Кошелёк подключён: " + data.address;
+                        tg.sendData(JSON.stringify({ address: data.address }));
+                        tg.close();
+                    }
+                });
+        }, 3000);
+    </script>
+</body>
+</html>
