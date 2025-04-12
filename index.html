@@ -30,7 +30,7 @@
 </head>
 <body>
   <h1>TON Connect</h1>
-  <button class="btn" id="connect">🔗 Подключить</button>
+  <button class="btn" id="connect">🔗 Подключить Tonkeeper</button>
   <div id="status">Ожидание подключения...</div>
 
   <script>
@@ -54,7 +54,6 @@
       try {
         const wallet = await tonConnectUI.connectWallet();
         const address = wallet?.account?.address;
-
         if (address) {
           document.getElementById("status").innerText = "✅ Подключено: " + address;
           tg.sendData(JSON.stringify({ address }));
